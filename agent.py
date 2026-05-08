@@ -8,7 +8,6 @@ import time
 import datetime
 from dotenv import load_dotenv
 
-from google.genai.types import HttpOptions
 from livekit import api as lkapi
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli, function_tool
 
@@ -166,7 +165,6 @@ async def entrypoint(ctx: JobContext):
             voice=voice,
             instructions=system_prompt,
             temperature=0.8,
-            http_options=HttpOptions(api_version="v1"),
         ),
     )
 
