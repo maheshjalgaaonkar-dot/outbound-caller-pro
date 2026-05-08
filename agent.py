@@ -139,7 +139,7 @@ async def entrypoint(ctx: JobContext):
 
     system_prompt: str = profile["system_prompt"]
     # Env vars take priority over profile defaults — set GEMINI_MODEL / GEMINI_TTS_VOICE in Coolify to override globally.
-    gemini_model: str = os.getenv("GEMINI_MODEL") or profile.get("model") or "gemini-2.5-flash-native-audio-latest"
+    gemini_model: str = os.getenv("GEMINI_MODEL") or profile.get("model") or "gemini-3.1-flash-live-preview"
     voice: str = os.getenv("GEMINI_TTS_VOICE") or profile.get("voice") or "Puck"
     use_realtime: bool = os.getenv("USE_GEMINI_REALTIME", "true").lower() != "false"
     logger.info(f"model={gemini_model} voice={voice} realtime={use_realtime}")
