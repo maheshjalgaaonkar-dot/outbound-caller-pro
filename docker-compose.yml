@@ -1,10 +1,9 @@
 services:
-  # FastAPI Dashboard + REST API
+  # Single container runs both FastAPI (port 8000) and the LiveKit agent worker.
   # Env vars are injected by Coolify — no .env file needed on VPS.
-  api:
+  aiona:
     build: .
     restart: unless-stopped
-    command: uvicorn api:app --host 0.0.0.0 --port 8000 --workers 1
     ports:
       - "8000:8000"
     healthcheck:
@@ -12,10 +11,4 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 15s
-
-  # LiveKit Agent Worker — only makes outbound connections to LiveKit Cloud, no inbound ports needed.
-  agent:
-    build: .
-    restart: unless-stopped
-    command: python agent.py start
+      start_period: 20s

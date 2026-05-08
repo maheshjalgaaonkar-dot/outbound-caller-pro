@@ -18,7 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source
 COPY . .
 
+RUN chmod +x start.sh
+
 EXPOSE 8000
 
-# Default: run API in production mode (no reload)
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Run both agent worker + API in one container
+CMD ["/bin/bash", "start.sh"]
