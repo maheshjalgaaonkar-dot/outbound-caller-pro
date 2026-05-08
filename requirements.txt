@@ -4,6 +4,7 @@ livekit-api==1.1.0
 livekit-plugins-google==1.5.8
 livekit-plugins-silero==1.5.8
 livekit-plugins-noise-cancellation==0.2.5
+google-genai>=1.0.0,<2.0.0
 
 # FastAPI Web Server
 fastapi>=0.111.0

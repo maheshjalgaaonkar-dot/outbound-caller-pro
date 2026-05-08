@@ -166,7 +166,7 @@ async def entrypoint(ctx: JobContext):
             voice=voice,
             instructions=system_prompt,
             temperature=0.8,
-            http_options=HttpOptions(api_version="v1alpha"),
+            http_options=HttpOptions(api_version="v1"),
         ),
     )
 
