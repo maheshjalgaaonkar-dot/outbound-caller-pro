@@ -2,6 +2,7 @@ import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
+import asyncio
 import logging
 import json
 import time
@@ -138,11 +139,20 @@ async def entrypoint(ctx: JobContext):
         return
 
     system_prompt: str = profile["system_prompt"]
+    initial_greeting: str = profile.get("initial_greeting") or "Hello! This is Aiona calling. How are you today?"
     # Env vars take priority over profile defaults — set GEMINI_MODEL / GEMINI_TTS_VOICE in Coolify to override globally.
     gemini_model: str = os.getenv("GEMINI_MODEL") or profile.get("model") or "gemini-3.1-flash-live-preview"
     voice: str = os.getenv("GEMINI_TTS_VOICE") or profile.get("voice") or "Puck"
     use_realtime: bool = os.getenv("USE_GEMINI_REALTIME", "true").lower() != "false"
     logger.info(f"model={gemini_model} voice={voice} realtime={use_realtime}")
+
+    # Inject greeting so model speaks first the moment the call connects
+    full_instructions = (
+        f"{system_prompt}\n\n"
+        f"IMPORTANT: You are making an OUTBOUND call. The moment the call connects "
+        f"you MUST immediately speak this greeting without waiting for the caller: "
+        f'"{initial_greeting}"'
+    )
 
     contact_id = ""
     call_log_id = ""
@@ -164,7 +174,7 @@ async def entrypoint(ctx: JobContext):
         llm=_google_realtime.RealtimeModel(
             model=gemini_model,
             voice=voice,
-            instructions=system_prompt,
+            instructions=full_instructions,
             temperature=0.8,
             http_options=HttpOptions(api_version="v1beta"),
         ),
@@ -173,7 +183,7 @@ async def entrypoint(ctx: JobContext):
     await session.start(
         room=ctx.room,
         agent=AionaAgent(
-            instructions=system_prompt,
+            instructions=full_instructions,
             phone=phone_number,
             contact_id=contact_id,
             call_log_id=call_log_id,
@@ -203,9 +213,11 @@ async def entrypoint(ctx: JobContext):
                         wait_until_answered=True,
                     )
                 )
-                logger.info("Call answered — Gemini Live reactive, waiting for caller to speak.")
+                logger.info("Call answered — triggering initial greeting...")
                 if call_log_id:
                     db.update_call_log(call_log_id, status="answered")
+                await asyncio.sleep(0.8)  # allow SIP audio path to stabilise
+                await session.generate_reply()
             except Exception as e:
                 logger.error(f"SIP dial failed: {e}")
                 if call_log_id:
