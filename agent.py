@@ -10,13 +10,18 @@ from dotenv import load_dotenv
 
 from livekit import api as lkapi
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli, function_tool
-from livekit.plugins import google
+
+try:
+    from livekit.plugins.google import realtime as _google_realtime
+except ImportError:
+    from livekit.plugins.google.beta import realtime as _google_realtime
 
 import db
 
 load_dotenv(override=False)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("aiona-agent")
+logger.info("=== aiona-agent starting up — livekit imports OK ===")
 
 
 # ─── Agent (tools defined as methods — livekit-agents 1.x API) ───────────────
@@ -152,7 +157,7 @@ async def entrypoint(ctx: JobContext):
     call_start = time.time()
 
     session = AgentSession(
-        llm=google.realtime.RealtimeModel(
+        llm=_google_realtime.RealtimeModel(
             model=gemini_model,
             voice=voice,
             instructions=system_prompt,
