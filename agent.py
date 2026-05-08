@@ -138,8 +138,11 @@ async def entrypoint(ctx: JobContext):
         return
 
     system_prompt: str = profile["system_prompt"]
-    gemini_model: str = profile.get("model", os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp"))
-    voice: str = profile.get("voice", "Puck")
+    # Env vars take priority over profile defaults — set GEMINI_MODEL / GEMINI_TTS_VOICE in Coolify to override globally.
+    gemini_model: str = os.getenv("GEMINI_MODEL") or profile.get("model") or "gemini-2.0-flash-exp"
+    voice: str = os.getenv("GEMINI_TTS_VOICE") or profile.get("voice") or "Puck"
+    use_realtime: bool = os.getenv("USE_GEMINI_REALTIME", "true").lower() != "false"
+    logger.info(f"model={gemini_model} voice={voice} realtime={use_realtime}")
 
     contact_id = ""
     call_log_id = ""
