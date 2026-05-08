@@ -1,11 +1,12 @@
 services:
   # FastAPI Dashboard + REST API
-  # Env vars are injected by Coolify (or your VPS environment) — no .env file needed on VPS.
+  # Env vars are injected by Coolify — no .env file needed on VPS.
   api:
     build: .
     restart: unless-stopped
     command: uvicorn api:app --host 0.0.0.0 --port 8000 --workers 1
-    network_mode: host
+    ports:
+      - "8000:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -13,12 +14,11 @@ services:
       retries: 5
       start_period: 15s
 
-  # LiveKit Agent Worker (Gemini Live voice)
+  # LiveKit Agent Worker — only makes outbound connections to LiveKit Cloud, no inbound ports needed.
   agent:
     build: .
     restart: unless-stopped
     command: python agent.py start
-    network_mode: host
     depends_on:
       api:
         condition: service_healthy
