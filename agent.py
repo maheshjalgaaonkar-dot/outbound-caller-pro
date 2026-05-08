@@ -137,7 +137,7 @@ async def entrypoint(ctx: JobContext):
         return
 
     system_prompt: str = profile["system_prompt"]
-    gemini_model: str = profile.get("model", os.getenv("GEMINI_MODEL", "gemini-2.0-flash-live-001"))
+    gemini_model: str = profile.get("model", os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp"))
     voice: str = profile.get("voice", "Puck")
 
     contact_id = ""
@@ -162,6 +162,7 @@ async def entrypoint(ctx: JobContext):
             voice=voice,
             instructions=system_prompt,
             temperature=0.8,
+            http_options={"api_version": "v1"},
         ),
     )
 
