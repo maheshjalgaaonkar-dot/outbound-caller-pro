@@ -19,6 +19,3 @@ services:
     build: .
     restart: unless-stopped
     command: python agent.py start
-    depends_on:
-      api:
-        condition: service_healthy
