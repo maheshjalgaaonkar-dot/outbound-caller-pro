@@ -8,6 +8,7 @@ import time
 import datetime
 from dotenv import load_dotenv
 
+from google.genai.types import HttpOptions
 from livekit import api as lkapi
 from livekit.agents import Agent, AgentSession, JobContext, WorkerOptions, cli, function_tool
 
@@ -138,7 +139,7 @@ async def entrypoint(ctx: JobContext):
 
     system_prompt: str = profile["system_prompt"]
     # Env vars take priority over profile defaults — set GEMINI_MODEL / GEMINI_TTS_VOICE in Coolify to override globally.
-    gemini_model: str = os.getenv("GEMINI_MODEL") or profile.get("model") or "gemini-2.0-flash-exp"
+    gemini_model: str = os.getenv("GEMINI_MODEL") or profile.get("model") or "gemini-2.0-flash-live-001"
     voice: str = os.getenv("GEMINI_TTS_VOICE") or profile.get("voice") or "Puck"
     use_realtime: bool = os.getenv("USE_GEMINI_REALTIME", "true").lower() != "false"
     logger.info(f"model={gemini_model} voice={voice} realtime={use_realtime}")
@@ -165,6 +166,7 @@ async def entrypoint(ctx: JobContext):
             voice=voice,
             instructions=system_prompt,
             temperature=0.8,
+            http_options=HttpOptions(api_version="v1alpha"),
         ),
     )
 

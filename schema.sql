@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS agent_profiles (
     name TEXT NOT NULL UNIQUE,
     system_prompt TEXT NOT NULL,
     initial_greeting TEXT NOT NULL DEFAULT 'Greet the user.',
-    model TEXT NOT NULL DEFAULT 'gemini-2.0-flash-exp',
+    model TEXT NOT NULL DEFAULT 'gemini-2.0-flash-live-001',
     voice TEXT NOT NULL DEFAULT 'Puck',
     language TEXT NOT NULL DEFAULT 'en-US',
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -95,7 +95,7 @@ VALUES (
     'Default Agent',
     'You are Aiona, a friendly and professional AI voice assistant making an outbound call. Your goal is to assist the person and, if appropriate, schedule an appointment. Be concise, warm, and professional. When the person agrees to a meeting, use the book_appointment tool.',
     'Hello! This is Aiona calling. How are you doing today?',
-    'gemini-2.0-flash-exp',
+    'gemini-2.0-flash-live-001',
     'Puck',
     'en-US'
 ) ON CONFLICT (name) DO NOTHING;
