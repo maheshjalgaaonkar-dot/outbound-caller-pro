@@ -217,7 +217,7 @@ async def entrypoint(ctx: JobContext):
                 if call_log_id:
                     db.update_call_log(call_log_id, status="answered")
                 await asyncio.sleep(0.8)  # allow SIP audio path to stabilise
-                await session.generate_reply()
+                await session.say(initial_greeting)
             except Exception as e:
                 logger.error(f"SIP dial failed: {e}")
                 if call_log_id:
