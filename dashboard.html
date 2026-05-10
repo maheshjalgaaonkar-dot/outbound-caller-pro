@@ -828,6 +828,7 @@ async function loadAgents(){
         <td>${p.language}</td>
         <td style="display:flex;gap:6px">
           <button class="btn btn-outline btn-sm" onclick="editAgent(${JSON.stringify(p).replace(/"/g,'&quot;')})">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="duplicateAgent(${JSON.stringify(p).replace(/"/g,'&quot;')})">Duplicate</button>
           <button class="btn btn-danger btn-sm" onclick="deleteAgent('${p.id}')">Del</button>
         </td>
       </tr>`).join('');
@@ -846,6 +847,20 @@ async function createAgentProfile(){
   try{
     await api('/agent-profiles',{method:'POST',body:JSON.stringify(data)});
     closeModal('modal-agent-create');toast('Profile created!');loadAgents();
+  }catch(e){toast(e.message,false);}
+}
+async function duplicateAgent(p){
+  try{
+    const data={
+      name:'Copy of '+p.name,
+      model:p.model,
+      voice:p.voice,
+      language:p.language,
+      system_prompt:p.system_prompt,
+      initial_greeting:p.initial_greeting,
+    };
+    await api('/agent-profiles',{method:'POST',body:JSON.stringify(data)});
+    toast('Duplicated as "'+data.name+'"!');loadAgents();
   }catch(e){toast(e.message,false);}
 }
 function editAgent(p){
