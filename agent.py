@@ -153,8 +153,9 @@ async def entrypoint(ctx: JobContext):
         contact_id = contact.get("id", "")
         if not contact_name:
             contact_name = contact.get("name", "")
-        system_prompt = system_prompt.replace("{name}", contact_name or "there")
-        logger.info(f"resolved contact_name='{contact_name or 'there'}' — {name} replaced in prompt")
+        resolved_name = contact_name or "there"
+        system_prompt = system_prompt.replace("{name}", resolved_name).replace("{contact_name}", resolved_name)
+        logger.info(f"resolved contact_name='{resolved_name}' — {{name}}/{{contact_name}} replaced in prompt")
         call_log = db.create_call_log(
             phone=phone_number,
             room_name=ctx.room.name,
