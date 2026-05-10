@@ -56,7 +56,7 @@ def _lk() -> lkapi.LiveKitAPI:
 
 
 async def _dispatch_call(phone: str, campaign_id: str = None,
-                          agent_profile_id: str = None) -> dict:
+                          agent_profile_id: str = None, name: str = None) -> dict:
     lk = _lk()
     room_name = f"call-{phone.replace('+','')}--{random.randint(10000,99999)}"
     meta = {"phone_number": phone}
@@ -64,6 +64,8 @@ async def _dispatch_call(phone: str, campaign_id: str = None,
         meta["campaign_id"] = campaign_id
     if agent_profile_id:
         meta["agent_profile_id"] = agent_profile_id
+    if name:
+        meta["contact_name"] = name
 
     try:
         dispatch = await lk.agent_dispatch.create_dispatch(
@@ -82,6 +84,7 @@ async def _dispatch_call(phone: str, campaign_id: str = None,
 
 class SingleCallRequest(BaseModel):
     phone: str
+    name: Optional[str] = None
     agent_profile_id: Optional[str] = None
 
 class CampaignCreate(BaseModel):
@@ -148,7 +151,7 @@ async def serve_dashboard():
 async def single_call(req: SingleCallRequest):
     if not req.phone.startswith("+"):
         raise HTTPException(400, "Phone must start with country code, e.g. +91...")
-    result = await _dispatch_call(req.phone, agent_profile_id=req.agent_profile_id)
+    result = await _dispatch_call(req.phone, agent_profile_id=req.agent_profile_id, name=req.name)
     return {"ok": True, **result}
 
 

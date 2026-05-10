@@ -195,6 +195,10 @@
         <input id="sc-phone" type="tel" placeholder="+91 98765 43210" autocomplete="tel"/>
       </div>
       <div class="form-group">
+        <label>Caller Name <span style="color:var(--muted);font-weight:400">(optional — used in {name} placeholder)</span></label>
+        <input id="sc-name" type="text" placeholder="e.g. Rahul Sharma"/>
+      </div>
+      <div class="form-group">
         <label>Agent Profile</label>
         <select id="sc-profile"><option value="">Default Agent</option></select>
       </div>
@@ -618,10 +622,11 @@ async function loadProfiles(){
 // ─── Single Call ──────────────────────────────────────────────────────────────
 async function singleCall(){
   const phone=document.getElementById('sc-phone').value.trim();
+  const name=document.getElementById('sc-name').value.trim();
   const pid=document.getElementById('sc-profile').value;
   if(!phone){toast('Enter phone number',false);return;}
   try{
-    const r=await api('/call/single',{method:'POST',body:JSON.stringify({phone,agent_profile_id:pid||null})});
+    const r=await api('/call/single',{method:'POST',body:JSON.stringify({phone,name:name||null,agent_profile_id:pid||null})});
     document.getElementById('sc-result').textContent=`✅ Dispatched — Room: ${r.room}`;
     toast('Call dispatched!');
   }catch(e){document.getElementById('sc-result').textContent='';toast('Error: '+e.message,false);}
