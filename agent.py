@@ -177,6 +177,26 @@ async def entrypoint(ctx: JobContext):
         ),
     )
 
+    transcript_turns = []
+
+    @session.on("conversation_item_added")
+    def on_conversation_item(msg):
+        try:
+            if hasattr(msg, 'role') and msg.role in ("user", "assistant"):
+                if isinstance(msg.content, str):
+                    text = msg.content
+                elif isinstance(msg.content, list):
+                    text = " ".join(p if isinstance(p, str) else getattr(p, 'text', str(p)) for p in msg.content)
+                else:
+                    text = str(msg.content)
+                if text and text.strip():
+                    transcript_turns.append({
+                        "role": "customer" if msg.role == "user" else "agent",
+                        "text": text.strip()
+                    })
+        except Exception as ex:
+            logger.debug(f"transcript capture: {ex}")
+
     await session.start(
         room=ctx.room,
         agent=AionaAgent(
@@ -224,12 +244,14 @@ async def entrypoint(ctx: JobContext):
     def on_disconnected(*_):
         duration = int(time.time() - call_start)
         if call_log_id:
-            db.update_call_log(
-                call_log_id,
+            update_data = dict(
                 status="completed",
                 duration_seconds=duration,
                 ended_at=datetime.datetime.utcnow().isoformat(),
             )
+            if transcript_turns:
+                update_data["transcript"] = json.dumps(transcript_turns, ensure_ascii=False)
+            db.update_call_log(call_log_id, **update_data)
         if campaign_id and contact_id:
             try:
                 cc_rows = (db.get_db()

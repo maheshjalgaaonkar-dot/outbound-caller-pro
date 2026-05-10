@@ -267,7 +267,7 @@ def get_call_logs(limit: int = 100, offset: int = 0):
 
 @app.get("/call-logs/{lid}")
 def get_call_log(lid: str):
-    res = db.get_db().table("call_logs").select("*").eq("id", lid).limit(1).execute()
+    res = db.get_db().table("call_logs").select("*, contacts(name,phone,email), campaigns(name), agent_profiles(name)").eq("id", lid).limit(1).execute()
     if not res.data:
         raise HTTPException(404)
     return res.data[0]

@@ -93,6 +93,41 @@
   /* Loader */
   .loader{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
+  /* Call Logs Master-Detail */
+  .cl-wrap{display:flex;height:calc(100vh - 56px);margin:-28px -32px;overflow:hidden}
+  .cl-list-panel{width:370px;min-width:300px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+  .cl-list-header{padding:18px 16px 12px;border-bottom:1px solid var(--border);background:var(--surface)}
+  .cl-list-body{flex:1;overflow-y:auto}
+  .cl-card{padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s}
+  .cl-card:hover{background:rgba(99,102,241,.08)}
+  .cl-card.active{background:rgba(99,102,241,.15);border-left:3px solid var(--accent)}
+  .cl-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+  .cl-card-phone{font-weight:600;font-size:13.5px;color:#fff}
+  .cl-card-name{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .cl-card-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px}
+  .cl-card-summary{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+  .cl-detail-panel{flex:1;overflow-y:auto;padding:28px 32px;display:flex;flex-direction:column;gap:20px}
+  .cl-detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:12px}
+  .cl-meta-row{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);padding:10px 0;border-bottom:1px solid var(--border)}
+  .cl-meta-row span b{color:var(--text)}
+  .cl-audio{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px}
+  .cl-audio audio{flex:1;height:36px;filter:invert(1) hue-rotate(200deg) brightness(.8)}
+  .cl-tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
+  .cl-tab{padding:9px 18px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;font-size:13.5px;font-weight:500;transition:.15s}
+  .cl-tab.active{color:#fff;border-bottom-color:var(--accent)}
+  .cl-tab-content{display:none;padding-top:16px}
+  .cl-tab-content.active{display:block}
+  .tr-bubble-wrap{display:flex;flex-direction:column;gap:10px}
+  .tr-msg{display:flex;flex-direction:column;gap:3px;max-width:80%}
+  .tr-msg.agent{align-self:flex-start}
+  .tr-msg.customer{align-self:flex-end}
+  .tr-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);padding:0 4px}
+  .tr-msg.agent .tr-label{color:var(--accent2)}
+  .tr-msg.customer .tr-label{color:var(--green);text-align:right}
+  .tr-bubble{padding:9px 13px;border-radius:10px;font-size:13px;line-height:1.5}
+  .tr-msg.agent .tr-bubble{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.2);color:#fff;border-radius:10px 10px 10px 2px}
+  .tr-msg.customer .tr-bubble{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.2);color:#fff;border-radius:10px 10px 2px 10px}
+  .cl-summary-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:13.5px;line-height:1.7;color:var(--text)}
   /* Responsive */
   @media(max-width:768px){
     #sidebar{width:60px}
@@ -249,17 +284,28 @@
 
   <!-- ─── CALL LOGS ────────────────────────────────────────── -->
   <div class="page" id="page-call-logs">
-    <h1>Call Logs</h1>
-    <p class="subtitle">History of all outbound calls</p>
-    <div style="display:flex;gap:10px;margin-bottom:12px">
-      <input id="logs-search" placeholder="Search by phone…" style="max-width:260px" oninput="loadCallLogs()"/>
-      <button class="btn btn-outline btn-sm" onclick="loadCallLogs()">Refresh</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Phone</th><th>Contact</th><th>Campaign</th><th>Status</th><th>Duration</th><th>Date</th><th>Recording</th></tr></thead>
-        <tbody id="logs-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted)">Loading…</td></tr></tbody>
-      </table>
+    <div class="cl-wrap">
+      <!-- Left: Call List -->
+      <div class="cl-list-panel">
+        <div class="cl-list-header">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div><div style="font-size:16px;font-weight:700;color:#fff">Call Logs</div><div style="font-size:11px;color:var(--muted)">All outbound call history</div></div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline btn-sm" onclick="exportCallLogs()">CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="loadCallLogs()">↻</button>
+            </div>
+          </div>
+          <input id="logs-search" placeholder="Search phone, name…" oninput="loadCallLogs()" style="font-size:12.5px;padding:7px 10px"/>
+        </div>
+        <div id="cl-list-body" class="cl-list-body"><div style="text-align:center;color:var(--muted);padding:40px 20px">Loading…</div></div>
+      </div>
+      <!-- Right: Detail Panel -->
+      <div class="cl-detail-panel" id="cl-detail-panel">
+        <div class="cl-detail-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span style="font-size:13px">Select a call to view transcript &amp; details</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -717,24 +763,93 @@ async function uploadCampaignContacts(){
 }
 
 // ─── Call Logs ────────────────────────────────────────────────────────────────
+function sentimentBadge(s){
+  const m={warm:'badge-green',hot:'badge-green',cold:'badge-blue',neutral:'badge-muted',negative:'badge-red'};
+  return `<span class="badge ${m[s]||'badge-muted'}">${(s||'neutral').toUpperCase()}</span>`;
+}
 async function loadCallLogs(){
   try{
-    const rows=await api('/call-logs?limit=100');
+    const rows=await api('/call-logs?limit=200');
     const search=(document.getElementById('logs-search').value||'').toLowerCase();
-    const filtered=search?rows.filter(r=>(r.phone||'').includes(search)||(r.contacts?.name||'').toLowerCase().includes(search)):rows;
-    const tb=document.getElementById('logs-tbody');
-    if(!filtered.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">No logs.</td></tr>';return;}
-    tb.innerHTML=filtered.map(r=>`
-      <tr>
-        <td>${r.phone}</td>
-        <td>${r.contacts?.name||'—'}</td>
-        <td>${r.campaigns?.name||'—'}</td>
-        <td>${badge(r.status)}</td>
-        <td>${fmtDuration(r.duration_seconds)}</td>
-        <td>${fmtDate(r.started_at)}</td>
-        <td>${r.recording_url?`<a href="${r.recording_url}" target="_blank" style="color:var(--accent2)">▶ Play</a>`:'—'}</td>
-      </tr>`).join('');
+    const filtered=search?rows.filter(r=>(r.phone||'').includes(search)||(r.contacts?.name||'').toLowerCase().includes(search)||(r.ai_summary||'').toLowerCase().includes(search)):rows;
+    const el=document.getElementById('cl-list-body');
+    if(!filtered.length){el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 20px">No call logs found.</div>';return;}
+    el.innerHTML=filtered.map(r=>`
+      <div class="cl-card" id="clcard-${r.id}" onclick="showCallDetail('${r.id}')">
+        <div class="cl-card-top">
+          <span class="cl-card-phone">${r.phone}</span>
+          <span style="font-size:11px;color:var(--muted)">${fmtDate(r.started_at)}</span>
+        </div>
+        <div class="cl-card-name">${r.contacts?.name||''}</div>
+        <div class="cl-card-meta">
+          ${badge(r.status)}
+          ${sentimentBadge(r.sentiment)}
+          ${r.duration_seconds?`<span style="font-size:11px;color:var(--muted)">⏱ ${fmtDuration(r.duration_seconds)}</span>`:''}
+          ${r.recording_url?'<span style="font-size:11px;color:var(--accent2)">▶ Recording</span>':''}
+          ${r.campaigns?.name?`<span style="font-size:11px;color:var(--muted)">#${r.campaigns.name}</span>`:''}
+        </div>
+        <div class="cl-card-summary">${r.ai_summary||'No summary'}</div>
+      </div>`).join('');
   }catch(e){toast('Logs error: '+e.message,false);}
+}
+async function showCallDetail(id){
+  document.querySelectorAll('.cl-card').forEach(c=>c.classList.remove('active'));
+  const card=document.getElementById('clcard-'+id);
+  if(card)card.classList.add('active');
+  const panel=document.getElementById('cl-detail-panel');
+  panel.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Loading…</div>';
+  try{
+    const r=await api('/call-logs/'+id);
+    let turns=[];
+    try{turns=r.transcript?JSON.parse(r.transcript):[];}catch(_){}
+    const transcriptHtml=turns.length?
+      `<div class="tr-bubble-wrap">${turns.map(t=>`
+        <div class="tr-msg ${t.role}">
+          <span class="tr-label">${t.role==='agent'?'AI Assistant':'Customer'}</span>
+          <div class="tr-bubble">${t.text}</div>
+        </div>`).join('')}</div>`:
+      '<div style="color:var(--muted);font-size:13px;padding:20px 0">No transcript available for this call.</div>';
+    const audioHtml=r.recording_url?
+      `<div class="cl-audio"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;color:var(--accent2)"><polygon points="5 3 19 12 5 21 5 3"/></svg><audio controls src="${r.recording_url}" style="flex:1"></audio></div>`:'';
+    panel.innerHTML=`
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px">${r.phone} — ${fmtDate(r.started_at)}</div>
+        <div class="cl-meta-row">
+          <span>📞 <b>${r.phone}</b></span>
+          ${r.contacts?.name?`<span>👤 <b>${r.contacts.name}</b></span>`:''}
+          <span>⏱ <b>${fmtDuration(r.duration_seconds)}</b></span>
+          <span>Direction: <b>${r.direction||'outbound'}</b></span>
+          <span>Status: ${badge(r.status)}</span>
+          ${r.sentiment?`<span>Sentiment: ${sentimentBadge(r.sentiment)}</span>`:''}
+          ${r.campaigns?.name?`<span>Campaign: <b>${r.campaigns.name}</b></span>`:''}
+          ${r.agent_profiles?.name?`<span>Agent: <b>${r.agent_profiles.name}</b></span>`:''}
+        </div>
+      </div>
+      ${audioHtml}
+      <div>
+        <div class="cl-tabs">
+          <div class="cl-tab active" onclick="clSwitchTab(this,'cl-transcript')">Transcript</div>
+          <div class="cl-tab" onclick="clSwitchTab(this,'cl-summary')">Summary</div>
+        </div>
+        <div id="cl-transcript" class="cl-tab-content active">${transcriptHtml}</div>
+        <div id="cl-summary" class="cl-tab-content">
+          <div class="cl-summary-box">${r.ai_summary||'<span style="color:var(--muted)">No summary available.</span>'}</div>
+        </div>
+      </div>`;
+  }catch(e){panel.innerHTML=`<div style="color:var(--red);padding:20px">Error: ${e.message}</div>`;}
+}
+function clSwitchTab(el,tabId){
+  el.closest('.cl-detail-panel')||el.closest('[id="cl-detail-panel"]');
+  document.querySelectorAll('.cl-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.cl-tab-content').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+async function exportCallLogs(){
+  const rows=await api('/call-logs?limit=5000');
+  const hdr=['phone','contact','campaign','status','duration','started_at','sentiment','recording'];
+  const csv=[hdr.join(','),...rows.map(r=>[r.phone,r.contacts?.name||'',r.campaigns?.name||'',r.status,r.duration_seconds,r.started_at,r.sentiment||'',r.recording_url||''].map(v=>`"${(v||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='call-logs.csv';a.click();
 }
 
 // ─── CRM ─────────────────────────────────────────────────────────────────────

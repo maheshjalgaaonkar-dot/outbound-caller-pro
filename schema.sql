@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS call_logs (
     recording_url TEXT,
     transcript TEXT,
     ai_summary TEXT,
+    sentiment TEXT DEFAULT 'neutral',
     started_at TIMESTAMPTZ DEFAULT now(),
     ended_at TIMESTAMPTZ
 );
