@@ -132,6 +132,7 @@ async def entrypoint(ctx: JobContext):
     campaign_id: str = meta.get("campaign_id", "")
     agent_profile_id: str = meta.get("agent_profile_id", "")
     contact_name: str = meta.get("contact_name", "")
+    logger.info(f"contact_name from metadata: '{contact_name}'")
 
     profile = db.get_agent_profile(profile_id=agent_profile_id or None)
     if not profile:
@@ -153,6 +154,7 @@ async def entrypoint(ctx: JobContext):
         if not contact_name:
             contact_name = contact.get("name", "")
         system_prompt = system_prompt.replace("{name}", contact_name or "there")
+        logger.info(f"resolved contact_name='{contact_name or 'there'}' — {name} replaced in prompt")
         call_log = db.create_call_log(
             phone=phone_number,
             room_name=ctx.room.name,
